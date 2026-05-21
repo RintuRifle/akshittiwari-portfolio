@@ -985,11 +985,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const counterEl = document.getElementById('visit-count');
     if (!counterEl) return;
 
-    try {
-        // Only increment once per browser session to avoid counting same user multiple times
-        const sessionKey = 'portfolio_visit_counted';
-        const alreadyCounted = sessionStorage.getItem(sessionKey);
+    const sessionKey = 'portfolio_visit_counted';
+    const alreadyCounted = sessionStorage.getItem(sessionKey);
 
+    try {
         let url;
         if (alreadyCounted) {
             // Just fetch the current count, don't increment
@@ -997,14 +996,22 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             // Increment and mark session as counted
             url = 'https://api.counterapi.dev/v1/RintuRifle_portfolio/visits/up';
-            sessionStorage.setItem(sessionKey, '1');
         }
 
         const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) throw new Error('API Error');
         const data = await res.json();
         
+        // If we successfully hit the 'up' endpoint, set the session flag
+        if (!alreadyCounted) {
+            sessionStorage.setItem(sessionKey, '1');
+        }
+        
         const targetValue = data.count ?? data.value ?? 1;
+        
+        // Save the true value to localStorage so we have a realistic fallback
+        localStorage.setItem('lastKnownVisits', targetValue);
+
         let currentValue = Math.max(0, targetValue - 25); // Start slightly lower for polished animation
         
         const interval = setInterval(() => {
@@ -1018,11 +1025,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 50);
         
     } catch (err) {
-        console.warn('Visitor counter API failed, using local fallback:', err);
-        // Fallback: LocalStorage mock to always stay working smoothly
-        let visits = parseInt(localStorage.getItem('localVisits') || '1428');
-        visits += 1;
-        localStorage.setItem('localVisits', visits);
+        console.warn('Visitor counter API rate limit/error, using local fallback:', err);
+        // Fallback: use last known successful API value, or baseline of 82
+        let visits = parseInt(localStorage.getItem('lastKnownVisits') || '82');
+        
+        // If we haven't counted this session yet, increment the fallback value
+        if (!alreadyCounted) {
+            visits += 1;
+            sessionStorage.setItem(sessionKey, '1');
+            localStorage.setItem('lastKnownVisits', visits);
+        }
+        
         counterEl.textContent = visits.toLocaleString();
     }
 })();
