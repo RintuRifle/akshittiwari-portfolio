@@ -15,7 +15,13 @@ function renderCalendar(gridId, monthLabelId, yearLabelId, endYear, endMonth, ca
   if (!calendarGrid) return;
   calendarGrid.innerHTML = "";
 
-  const endDate = new Date(endYear, endMonth + 1, 0); // Last day of endMonth
+  // ── FIX: endDate is today if we're viewing the current month, otherwise last day of endMonth
+  const now = new Date();
+  const isCurrentMonth = (endYear === now.getFullYear() && endMonth === now.getMonth());
+  const endDate = isCurrentMonth
+    ? new Date(now.getFullYear(), now.getMonth(), now.getDate())   // today
+    : new Date(endYear, endMonth + 1, 0);                         // last day of endMonth
+
   const startDate = new Date(endYear, endMonth - 5, 1); // First day of 6 months ago
 
   if (monthLabel) {
@@ -286,9 +292,21 @@ async function loadGitHubStats() {
             topRepos.forEach(repo => {
                 const card = document.createElement('div');
                 card.className = 'project-card';
+
+                // GitHub social preview image URL
+                const previewImg = `https://opengraph.githubassets.com/1/${ghUsername}/${repo.name}`;
+
                 card.innerHTML = `
-                    <div class="project-image">
-                        <i class="fab fa-github"></i>
+                    <div class="project-image" style="padding: 0; background: var(--border-light);">
+                        <img 
+                            src="${previewImg}" 
+                            alt="${repo.name} preview"
+                            style="width:100%;height:100%;object-fit:cover;display:block;border-radius:0;"
+                            onerror="this.style.display='none'; this.parentElement.querySelector('.gh-fallback-icon').style.display='flex';"
+                        >
+                        <div class="gh-fallback-icon" style="display:none; position:absolute; inset:0; align-items:center; justify-content:center;">
+                            <i class="fab fa-github" style="font-size:3rem; color:rgba(0,0,0,0.1); z-index:1;"></i>
+                        </div>
                     </div>
                     <div class="project-content">
                         <div class="project-header">
@@ -968,12 +986,25 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!counterEl) return;
 
     try {
-        // Increment and get new value from counter API
-        const res = await fetch('https://api.counterapi.dev/v1/RintuRifle_portfolio/visits/up');
+        // Only increment once per browser session to avoid counting same user multiple times
+        const sessionKey = 'portfolio_visit_counted';
+        const alreadyCounted = sessionStorage.getItem(sessionKey);
+
+        let url;
+        if (alreadyCounted) {
+            // Just fetch the current count, don't increment
+            url = 'https://api.counterapi.dev/v1/RintuRifle_portfolio/visits';
+        } else {
+            // Increment and mark session as counted
+            url = 'https://api.counterapi.dev/v1/RintuRifle_portfolio/visits/up';
+            sessionStorage.setItem(sessionKey, '1');
+        }
+
+        const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) throw new Error('API Error');
         const data = await res.json();
         
-        const targetValue = data.value || 1;
+        const targetValue = data.count ?? data.value ?? 1;
         let currentValue = Math.max(0, targetValue - 25); // Start slightly lower for polished animation
         
         const interval = setInterval(() => {
