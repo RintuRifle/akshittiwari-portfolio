@@ -401,6 +401,47 @@ body {
     gap: 12px;
 }
 
+/* Discord Branch Button */
+.more-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+.more-btn {
+    z-index: 2;
+    position: relative;
+}
+.branch-btn {
+    position: absolute;
+    left: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(0) scale(0.9);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1;
+}
+.more-container.expanded .branch-btn {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(calc(100% + 10px)) scale(1);
+}
+.hashnode-btn {
+    background: #2962FF;
+    color: white;
+    border-color: #2962FF;
+}
+.hashnode-btn i {
+    color: white;
+}
+.hashnode-btn:hover {
+    background: #1E4ED8;
+    border-color: #1E4ED8;
+    color: white !important;
+}
+.hashnode-btn:hover i {
+    color: white !important;
+}
+
 /* Hero bottom-left decoration strip */
 .hero-deco {
     margin-top: 32px;
@@ -464,6 +505,14 @@ body {
 
 .action-btn:hover i {
     color: var(--bg-color);
+}
+
+[data-theme="dark"] .action-btn.github-profile-btn:hover {
+    background: #ffffff !important;
+    color: #000000 !important;
+}
+[data-theme="dark"] .action-btn.github-profile-btn:hover i {
+    color: #000000 !important;
 }
 
 /* Sections */
@@ -1043,7 +1092,7 @@ mark {
 .chakra-orbit {
     position: absolute;
     /* Must rotate before translate to form a circle */
-    transform: rotate(calc(36deg * var(--i))) translateY(-150px);
+    transform: rotate(calc(30deg * var(--i))) translateY(-150px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1064,7 +1113,7 @@ mark {
     cursor: pointer;
     transition: all 0.3s ease;
     /* Static offset to stay upright */
-    transform: rotate(calc(-36deg * var(--i)));
+    transform: rotate(calc(-30deg * var(--i)));
     /* Animate the independent rotate property */
     animation: reverse-spin 30s linear infinite;
 }

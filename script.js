@@ -6,6 +6,20 @@ const SUPABASE_URL = 'https://koggdnslelupnbypesql.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_Kwm7KP_WSq9QLieiUfWqaA_B3lZ6Gic';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// --- More Branch Logic ---
+function toggleMoreBranch() {
+    const container = document.querySelector('.more-container');
+    if (!container) return;
+    container.classList.toggle('expanded');
+}
+
+document.addEventListener('click', (e) => {
+    const container = document.querySelector('.more-container');
+    if (container && container.classList.contains('expanded') && !container.contains(e.target)) {
+        container.classList.remove('expanded');
+    }
+});
+
 // --- Shared Calendar Heatmap renderLogic ---
 function renderCalendar(gridId, monthLabelId, yearLabelId, endYear, endMonth, calendarData, titleFormatter) {
   const calendarGrid = document.getElementById(gridId);
@@ -263,9 +277,43 @@ async function loadCodeforcesStats() {
     }
 }
 
-// --- GitHub Logic ---
+// --- Tech Stack Helpers ---
+function getTechIcon(techName) {
+    const name = techName.toLowerCase();
+    if (name.includes('react')) return { icon: 'fab fa-react', color: '#61dafb' };
+    if (name.includes('next')) return { isNext: true };
+    if (name.includes('tailwind')) return { icon: 'fas fa-wind', color: '#38bdf8' };
+    if (name.includes('typescript') || name.includes('ts')) return { isTS: true };
+    if (name.includes('node') || name.includes('express')) return { icon: 'fab fa-node-js', color: '#68a063' };
+    if (name.includes('supabase')) return { icon: 'fas fa-bolt', color: '#3ecf8e' };
+    if (name.includes('javascript') || name.includes('js')) return { icon: 'fab fa-js', color: '#f7df1e' };
+    if (name.includes('python')) return { icon: 'fab fa-python', color: '#3776ab' };
+    if (name.includes('html')) return { icon: 'fab fa-html5', color: '#e34f26' };
+    if (name.includes('css')) return { icon: 'fab fa-css3-alt', color: '#1572b6' };
+    if (name.includes('java') && !name.includes('script')) return { icon: 'fab fa-java', color: '#007396' };
+    if (name.includes('c++') || name.includes('cpp')) return { icon: 'fas fa-code', color: '#00599c' };
+    return { icon: 'fas fa-code', color: '#666' };
+}
+
+function renderTechStack(techArray) {
+    if (!techArray || techArray.length === 0) return '';
+    
+    return techArray.slice(0, 4).map(tech => {
+        const t = getTechIcon(tech);
+        if (t.isNext) {
+            return `<span class="tech-pill"><span style="background: var(--text-primary); color: var(--bg-color); width: 12px; height: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 900; border-radius: 50%; line-height: 1; margin-right: 4px;">N</span> Next.js</span>`;
+        }
+        if (t.isTS) {
+            return `<span class="tech-pill"><span style="background: #3178c6; color: white; width: 12px; height: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 7px; font-weight: bold; border-radius: 2px; line-height: 1; margin-right: 4px;">TS</span> TypeScript</span>`;
+        }
+        return `<span class="tech-pill"><i class="${t.icon}" style="color:${t.color};"></i> ${tech}</span>`;
+    }).join('');
+}
+
+// --- GitHub Stats & Supabase Projects Logic ---
 async function loadGitHubStats() {
     try {
+        // Fetch User Stats from GitHub
         const userRes = await fetch(`https://api.github.com/users/${ghUsername}`);
         const userData = await userRes.json();
 
@@ -274,112 +322,149 @@ async function loadGitHubStats() {
             document.getElementById("gh-followers").textContent = userData.followers;
         }
 
+        let ghRepos = [];
         const reposRes = await fetch(`https://api.github.com/users/${ghUsername}/repos?per_page=100&sort=pushed`);
-        const reposData = await reposRes.json();
-
         if (reposRes.ok) {
-            const totalStars = reposData.reduce((acc, repo) => acc + repo.stargazers_count, 0);
+            ghRepos = await reposRes.json();
+            const totalStars = ghRepos.reduce((acc, repo) => acc + repo.stargazers_count, 0);
             document.getElementById("gh-total-stars").textContent = totalStars;
-
-            const topRepos = reposData
-                .filter(repo => !repo.fork)
-                .sort((a, b) => b.stargazers_count - a.stargazers_count)
-                .slice(0, 4);
-
-            const reposContainer = document.getElementById("gh-top-repos");
-            reposContainer.innerHTML = ''; 
-
-            topRepos.forEach(repo => {
-                const card = document.createElement('div');
-                card.className = 'project-card';
-
-                // GitHub social preview image URL
-                const previewImg = `https://opengraph.githubassets.com/1/${ghUsername}/${repo.name}`;
-
-                card.innerHTML = `
-                    <div class="project-image" style="padding: 0; background: var(--border-light);">
-                        <img 
-                            src="${previewImg}" 
-                            alt="${repo.name} preview"
-                            style="width:100%;height:100%;object-fit:cover;display:block;border-radius:0;"
-                            onerror="this.style.display='none'; this.parentElement.querySelector('.gh-fallback-icon').style.display='flex';"
-                        >
-                        <div class="gh-fallback-icon" style="display:none; position:absolute; inset:0; align-items:center; justify-content:center;">
-                            <i class="fab fa-github" style="font-size:3rem; color:rgba(0,0,0,0.1); z-index:1;"></i>
-                        </div>
-                    </div>
-                    <div class="project-content">
-                        <div class="project-header">
-                            <a href="${repo.html_url}" target="_blank" class="project-title">${repo.name}</a>
-                            <div class="project-links">
-                                <a href="${repo.html_url}" target="_blank"><i class="fab fa-github"></i></a>
-                                ${repo.homepage ? `<a href="${repo.homepage}" target="_blank"><i class="fas fa-external-link-alt"></i></a>` : ''}
-                            </div>
-                        </div>
-                        <p class="project-desc">${repo.description || 'A software project developed by Akshit Kumar Tiwari.'}</p>
-                        
-                        <span class="tech-stack-label">TECHSTACKS</span>
-                        <div class="tech-stack">
-                            ${(() => {
-                                const detected = [];
-                                const name = repo.name.toLowerCase();
-                                const desc = (repo.description || '').toLowerCase();
-                                const lang = repo.language;
-
-                                if (name.includes('react') || desc.includes('react')) detected.push({ name: 'React', icon: 'fab fa-react', color: '#61dafb' });
-                                if (name.includes('next') || desc.includes('next')) detected.push({ name: 'Next.js', icon: 'fab fa-node-js', color: '#fff', isNext: true });
-                                if (name.includes('tailwind') || desc.includes('tailwind')) detected.push({ name: 'Tailwind', icon: 'fas fa-wind', color: '#38bdf8' });
-                                if (name.includes('typescript') || name.includes('ts-') || desc.includes('typescript')) detected.push({ name: 'TypeScript', icon: 'fab fa-js-square', color: '#3178c6', isTS: true });
-                                if (name.includes('node') || desc.includes('node') || desc.includes('express')) detected.push({ name: 'Node.js', icon: 'fab fa-node-js', color: '#68a063' });
-                                if (name.includes('supabase') || desc.includes('supabase')) detected.push({ name: 'Supabase', icon: 'fas fa-bolt', color: '#3ecf8e' });
-
-                                if (lang && !detected.some(t => t.name.toLowerCase() === lang.toLowerCase())) {
-                                    let iconClass = 'fas fa-code';
-                                    let color = '#666';
-                                    const l = lang.toLowerCase();
-                                    if (l === 'javascript') { iconClass = 'fab fa-js'; color = '#f7df1e'; }
-                                    else if (l === 'typescript') { iconClass = 'fab fa-js-square'; color = '#3178c6'; }
-                                    else if (l === 'python') { iconClass = 'fab fa-python'; color = '#3776ab'; }
-                                    else if (l === 'html') { iconClass = 'fab fa-html5'; color = '#e34f26'; }
-                                    else if (l === 'css') { iconClass = 'fab fa-css3-alt'; color = '#1572b6'; }
-                                    else if (l === 'java') { iconClass = 'fab fa-java'; color = '#007396'; }
-                                    else if (l === 'c++' || l === 'cpp') { iconClass = 'fas fa-code'; color = '#00599c'; }
-                                    detected.push({ name: lang, icon: iconClass, color });
-                                }
-
-                                if (detected.length === 0) {
-                                    detected.push({ name: 'Software', icon: 'fas fa-code', color: '#666' });
-                                }
-
-                                return detected.slice(0, 3).map(t => {
-                                    if (t.isNext) {
-                                        return `<span class="tech-pill"><span style="background: var(--text-primary); color: var(--bg-color); width: 12px; height: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 900; border-radius: 50%; line-height: 1; margin-right: 4px;">N</span> Next.js</span>`;
-                                    }
-                                    if (t.isTS) {
-                                        return `<span class="tech-pill"><span style="background: #3178c6; color: white; width: 12px; height: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 7px; font-weight: bold; border-radius: 2px; line-height: 1; margin-right: 4px;">TS</span> TypeScript</span>`;
-                                    }
-                                    return `<span class="tech-pill"><i class="${t.icon}" style="color:${t.color};"></i> ${t.name}</span>`;
-                                }).join('');
-                            })()}
-                            <span class="tech-pill" style="margin-left: auto; border: none; background: transparent; padding: 0;"><i class="fas fa-star" style="color:#fbbf24; margin-right: 4px;"></i> ${repo.stargazers_count}</span>
-                        </div>
-
-                        <div class="project-footer">
-                            <div class="status">
-                                <span class="status-dot"></span> Completed
-                            </div>
-                            <a href="${repo.html_url}" target="_blank" class="view-details">View Details <i class="fas fa-chevron-right" style="font-size:0.7rem"></i></a>
-                        </div>
-                    </div>
-                `;
-                reposContainer.appendChild(card);
-            });
         }
+
+        // Fetch Featured Projects from Supabase
+        let sbProjects = [];
+        const { data: projects, error } = await supabaseClient
+            .from('projects')
+            .select('*');
+        if (!error && projects) sbProjects = projects;
+
+        // Merge
+        const mergedProjectsMap = new Map();
+
+        ghRepos.forEach(repo => {
+            if (repo.fork) return;
+            
+            const detected = [];
+            const name = repo.name.toLowerCase();
+            const desc = (repo.description || '').toLowerCase();
+            if (name.includes('react') || desc.includes('react')) detected.push('React');
+            if (name.includes('next') || desc.includes('next')) detected.push('Next.js');
+            if (name.includes('tailwind') || desc.includes('tailwind')) detected.push('Tailwind');
+            if (name.includes('typescript') || name.includes('ts-') || desc.includes('typescript')) detected.push('TypeScript');
+            if (name.includes('node') || desc.includes('node') || desc.includes('express')) detected.push('Node.js');
+            if (repo.language && !detected.includes(repo.language)) detected.push(repo.language);
+
+            mergedProjectsMap.set(repo.html_url.toLowerCase(), {
+                title: repo.name,
+                description: repo.description,
+                github_url: repo.html_url,
+                demo_url: repo.homepage || null,
+                tech_stack: detected,
+                cover_image: `https://opengraph.githubassets.com/1/${ghUsername}/${repo.name}`,
+                is_completed: false,
+                display_order: 999,
+                stars: repo.stargazers_count,
+                pushed_at: new Date(repo.pushed_at).getTime()
+            });
+        });
+
+        sbProjects.forEach(sb => {
+            const key = (sb.github_url || '').toLowerCase();
+            if (key && mergedProjectsMap.has(key)) {
+                const existing = mergedProjectsMap.get(key);
+                if (sb.title) existing.title = sb.title;
+                if (sb.description) existing.description = sb.description;
+                if (sb.demo_url) existing.demo_url = sb.demo_url;
+                if (sb.tech_stack && sb.tech_stack.length > 0) existing.tech_stack = sb.tech_stack;
+                if (sb.cover_image) existing.cover_image = sb.cover_image;
+                existing.is_completed = sb.is_completed;
+                existing.display_order = sb.display_order;
+            } else {
+                mergedProjectsMap.set(`sb_${sb.id}`, {
+                    title: sb.title,
+                    description: sb.description,
+                    github_url: sb.github_url,
+                    demo_url: sb.demo_url,
+                    tech_stack: sb.tech_stack || [],
+                    cover_image: sb.cover_image,
+                    is_completed: sb.is_completed,
+                    display_order: sb.display_order || 0,
+                    stars: 0,
+                    pushed_at: new Date(sb.created_at).getTime()
+                });
+            }
+        });
+
+        const finalProjects = Array.from(mergedProjectsMap.values()).sort((a, b) => {
+            if (a.display_order !== b.display_order) return a.display_order - b.display_order;
+            if (b.stars !== a.stars) return b.stars - a.stars;
+            return b.pushed_at - a.pushed_at;
+        }).slice(0, 4); // Only top 4 for homepage
+
+        const reposContainer = document.getElementById("gh-top-repos");
+        reposContainer.innerHTML = ''; 
+        
+        if (finalProjects.length === 0) {
+            reposContainer.innerHTML = '<p style="color: var(--text-secondary); grid-column: 1/-1; text-align: center;">No projects available yet.</p>';
+            return;
+        }
+
+        finalProjects.forEach(repo => {
+            const card = document.createElement('div');
+            card.className = 'project-card';
+
+            const previewImg = repo.cover_image || '';
+
+            let linksHtml = '';
+            if (repo.stars > 0) linksHtml += `<span style="color:var(--accent); font-size: 0.9rem; margin-right: auto; display:flex; align-items:center; gap:4px;" title="GitHub Stars"><i class="fas fa-star"></i> ${repo.stars}</span>`;
+            if (repo.github_url) linksHtml += `<a href="${repo.github_url}" target="_blank"><i class="fab fa-github"></i></a>`;
+            if (repo.demo_url) linksHtml += `<a href="${repo.demo_url}" target="_blank"><i class="fas fa-external-link-alt"></i></a>`;
+
+            const statusClass = repo.is_completed ? 'status-dot' : 'status-dot dev';
+            const statusText = repo.is_completed ? 'Completed' : 'Under Development';
+            const statusStyle = repo.is_completed ? '' : 'background: #fbbf24; box-shadow: 0 0 8px rgba(251, 191, 36, 0.5);';
+
+            card.innerHTML = `
+                <div class="project-image" style="padding: 0; background: var(--border-light);">
+                    ${previewImg ? `<img 
+                        src="${previewImg}" 
+                        alt="${repo.title} preview"
+                        style="width:100%;height:100%;object-fit:cover;display:block;border-radius:0;"
+                        onerror="this.style.display='none'; this.parentElement.querySelector('.gh-fallback-icon').style.display='flex';"
+                    >` : ''}
+                    <div class="gh-fallback-icon" style="display:${previewImg ? 'none' : 'flex'}; position:absolute; inset:0; align-items:center; justify-content:center;">
+                        <i class="fas fa-code" style="font-size:3rem; color:rgba(0,0,0,0.1); z-index:1;"></i>
+                    </div>
+                </div>
+                <div class="project-content">
+                    <div class="project-header">
+                        <a href="${repo.demo_url || repo.github_url || '#'}" target="_blank" class="project-title">${repo.title}</a>
+                        <div class="project-links">
+                            ${linksHtml}
+                        </div>
+                    </div>
+                    <p class="project-desc">${repo.description || 'A software project developed by Akshit Kumar Tiwari.'}</p>
+                    
+                    <span class="tech-stack-label">TECHSTACKS</span>
+                    <div class="tech-stack">
+                        ${renderTechStack(repo.tech_stack)}
+                    </div>
+
+                    <div class="project-footer">
+                        <div class="status">
+                            <span class="${statusClass}" style="${statusStyle}"></span> ${statusText}
+                        </div>
+                        <a href="${repo.demo_url || repo.github_url || '#'}" target="_blank" class="view-details">View Details <i class="fas fa-chevron-right" style="font-size:0.7rem"></i></a>
+                    </div>
+                </div>
+            `;
+            reposContainer.appendChild(card);
+        });
+
     } catch (error) {
-        console.error("GitHub fetch error:", error);
+        console.error("Projects fetch error:", error);
         const reposContainer = document.getElementById("gh-top-repos");
         if (reposContainer) {
-            reposContainer.innerHTML = '<p style="color: var(--text-secondary); grid-column: 1/-1; text-align: center;">Unable to load GitHub repositories.</p>';
+            reposContainer.innerHTML = '<p style="color: var(--text-secondary); grid-column: 1/-1; text-align: center;">Unable to load repositories.</p>';
         }
     }
 }
@@ -989,25 +1074,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const alreadyCounted = sessionStorage.getItem(sessionKey);
 
     try {
-        let url;
+        let targetValue = 1;
+        
         if (alreadyCounted) {
-            // Just fetch the current count, don't increment
-            url = 'https://api.counterapi.dev/v1/RintuRifle_portfolio/visits';
+            // Just fetch the current count
+            const { data, error } = await supabaseClient
+                .from('site_stats')
+                .select('visits')
+                .single();
+            if (error) throw error;
+            targetValue = data.visits || 1;
         } else {
             // Increment and mark session as counted
-            url = 'https://api.counterapi.dev/v1/RintuRifle_portfolio/visits/up';
-        }
-
-        const res = await fetch(url, { cache: 'no-store' });
-        if (!res.ok) throw new Error('API Error');
-        const data = await res.json();
-        
-        // If we successfully hit the 'up' endpoint, set the session flag
-        if (!alreadyCounted) {
+            const { data, error } = await supabaseClient.rpc('increment_site_visits');
+            if (error) throw error;
+            targetValue = data || 1;
             sessionStorage.setItem(sessionKey, '1');
         }
-        
-        const targetValue = data.count ?? data.value ?? 1;
         
         // Save the true value to localStorage so we have a realistic fallback
         localStorage.setItem('lastKnownVisits', targetValue);
@@ -1025,7 +1108,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 50);
         
     } catch (err) {
-        console.warn('Visitor counter API rate limit/error, using local fallback:', err);
+        console.warn('Visitor counter error, using local fallback:', err);
         // Fallback: use last known successful API value, or baseline of 82
         let visits = parseInt(localStorage.getItem('lastKnownVisits') || '82');
         

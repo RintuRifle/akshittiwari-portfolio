@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects | Akshit Kumar Tiwari</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Devicon -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .projects-page-container {
+            padding-top: 100px;
+            padding-bottom: 60px;
+        }
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+            transition: color 0.2s ease;
+        }
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+        .back-link i {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated background canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="container">
+        <nav class="navbar">
+            <div class="nav-controls">
+                <button class="theme-toggle" aria-label="Toggle theme">
+                    <i class="fas fa-sun"></i>
+                </button>
+            </div>
+            <div class="nav-links" style="align-items: center;">
+                <a href="index.html">HOME</a>
+                <a href="index.html#work">WORK</a>
+                <a href="index.html#dsa">CONTESTS & DSA</a>
+                <a href="index.html#about">ABOUT</a>
+                <a href="index.html#blog">BLOG</a>
+                <a href="index.html#contact">CONTACT</a>
+            </div>
+        </nav>
+
+        <main class="projects-page-container">
+            <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            
+            <h1 class="section-title">All Projects</h1>
+            <p style="color: var(--text-secondary); margin-bottom: 24px;">A showcase of my software engineering projects, applications, and experiments.</p>
+
+            <div id="all-projects-grid" class="projects-grid">
+                <div class="stylish-loader-container" style="grid-column: 1/-1;">
+                    <div class="stylish-loader-animation">
+                        <div class="stylish-loader-ring"></div>
+                        <div class="stylish-loader-inner"></div>
+                        <div class="stylish-loader-core"></div>
+                    </div>
+                    <div class="stylish-loader-bars">
+                        <div class="stylish-loader-bar"></div><div class="stylish-loader-bar"></div><div class="stylish-loader-bar"></div><div class="stylish-loader-bar"></div><div class="stylish-loader-bar"></div>
+                    </div>
+                    <div class="stylish-loader-text">Loading Projects...</div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="site-footer">
+            <div class="footer-content">
+                <p>&copy; 2026 Akshith Kumar Tiwari. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="projects.js"></script>
+</body>
+</html>
