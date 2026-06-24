@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "cleanUrls": true,
   "builds": [
     { "src": "api/send-email.js", "use": "@vercel/node" },
     { "src": "*.html", "use": "@vercel/static" },
@@ -7,8 +8,9 @@
     { "src": "*.js", "use": "@vercel/static" },
     { "src": "assets/**", "use": "@vercel/static" }
   ],
-  "routes": [
-    { "src": "/api/send-email", "dest": "/api/send-email.js" },
-    { "src": "/(.*)", "dest": "/$1" }
+  "rewrites": [
+    { "source": "/home", "destination": "/" },
+    { "source": "/project", "destination": "/projects.html" },
+    { "source": "/api/send-email", "destination": "/api/send-email.js" }
   ]
 }
