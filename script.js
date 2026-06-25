@@ -1,7 +1,7 @@
 const handle = "RintuRifle";
 const ghUsername = "RintuRifle";
 
-// ── Supabase Config ──────────────────────────────────────────────
+//  Supabase Config 
 const SUPABASE_URL = 'https://koggdnslelupnbypesql.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_Kwm7KP_WSq9QLieiUfWqaA_B3lZ6Gic';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -843,7 +843,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// ── Multi-Mode Animated Canvas Background System ─────────────────────────────
+// Multi-Mode Animated Canvas Background System 
 (function initBgCanvas() {
     const canvas = document.getElementById('bg-canvas');
     if (!canvas) return;
@@ -859,7 +859,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return isDark() ? `rgba(255,255,255,${alpha})` : `rgba(0,0,0,${alpha})`;
     }
 
-    // ── CIRCUIT ──────────────────────────────────────────────────────────────
+    //  CIRCUIT 
     function initCircuit() {
         const GRID = 60;
         function snap(v) { return Math.round(v / GRID) * GRID; }
@@ -917,7 +917,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ── WAVES ────────────────────────────────────────────────────────────────
+    //  WAVES 
     function initWaves() {
         scene = {
             t: 0,
@@ -946,7 +946,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ── SPIRAL ───────────────────────────────────────────────────────────────
+    //  SPIRAL 
     function initSpiral() { scene = { t: 0 }; }
     function drawSpiral() {
         ctx.clearRect(0, 0, W, H);
@@ -971,7 +971,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, 50, 0, Math.PI * 2); ctx.fill();
     }
 
-    // ── CONSTELLATION ────────────────────────────────────────────────────────
+    //  CONSTELLATION 
     function initConstellation() {
         const count = Math.min(80, Math.floor((W * H) / 18000));
         scene = {
@@ -1005,7 +1005,7 @@ document.addEventListener("DOMContentLoaded", () => {
         for (const s of stars) { ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill(); }
     }
 
-    // ── TREE ─────────────────────────────────────────────────────────────────
+    //  TREE 
     function initTree() { scene = { t: 0 }; }
     function branch(x, y, angle, len, depth) {
         if (depth === 0 || len < 2) return;
@@ -1023,11 +1023,11 @@ document.addEventListener("DOMContentLoaded", () => {
         branch(W / 2, H, -Math.PI / 2, Math.min(H * 0.22, 160), 10);
     }
 
-    // ── NONE ─────────────────────────────────────────────────────────────────
+    //  NONE 
     function initNone() { scene = {}; }
     function drawNone() { ctx.clearRect(0, 0, W, H); }
 
-    // ── ENGINE ───────────────────────────────────────────────────────────────
+    // ENGINE
     const MODES = {
         circuit:       { init: initCircuit,       draw: drawCircuit },
         waves:         { init: initWaves,          draw: drawWaves },
@@ -1076,12 +1076,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 })();
 
-// ── Live Visitor Counter ─────────────────────────────────────────────────────
+//  Live Visitor Counter 
 (async function initVisitorCounter() {
     const counterEl = document.getElementById('visit-count');
     if (!counterEl) return;
 
-    const sessionKey = 'portfolio_visit_counted';
+    const sessionKey = 'prtfolio_visit_counted';
     const alreadyCounted = sessionStorage.getItem(sessionKey);
 
     try {
@@ -1175,7 +1175,7 @@ function initRocketScroll() {
             // Burst of final flames
             for(let i=0; i<5; i++) createRocketFlame(rocketBtn);
 
-            // Smooth scroll to top
+            // scroll to top
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
@@ -1222,7 +1222,7 @@ function createRocketFlame(button) {
 
     document.body.appendChild(flame);
 
-    // Remove flame after animation completes
+ 
     setTimeout(() => {
         flame.remove();
     }, 600);
