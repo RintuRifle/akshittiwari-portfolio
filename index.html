@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
+    <!-- Cloudflare Turnstile -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
     <!-- Animated background canvas -->
@@ -362,6 +364,9 @@
                                 <label for="message">Message</label>
                                 <textarea id="message" name="message" rows="6" required></textarea>
                             </div>
+                            <!-- Cloudflare Turnstile Widget (Dummy Site Key for Testing) -->
+                            <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="dark" style="margin-bottom: 24px;"></div>
+                            
                             <div class="form-actions">
                                 <button type="submit" class="btn-primary">
                                     <i class="fas fa-paper-plane"></i>

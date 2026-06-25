@@ -716,6 +716,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const subject = document.getElementById('subject').value;
             const message = document.getElementById('message').value;
             const currentTime = new Date().toISOString();
+            
+            const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]')?.value;
+            
+            if (!turnstileResponse) {
+                formStatus.textContent = 'Please complete the Cloudflare security check.';
+                formStatus.className = 'form-status error';
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i><span>Send Message</span>';
+                return;
+            }
 
             // Format the email body
             const emailBody = `
@@ -737,7 +747,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         to: ["rishimuni797658@gmail.com"], // Replace with your own email (MUST be verified in Resend if on free tier)
                         subject: `Portfolio: ${subject || 'New Message'}`,
                         text: emailBody,
-                        html: emailBody
+                        html: emailBody,
+                        turnstileToken: turnstileResponse
                     })
                 });
 
