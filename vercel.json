@@ -3,6 +3,7 @@
   "cleanUrls": true,
   "builds": [
     { "src": "api/send-email.js", "use": "@vercel/node" },
+    { "src": "api/leetcode.js", "use": "@vercel/node" },
     { "src": "*.html", "use": "@vercel/static" },
     { "src": "*.css", "use": "@vercel/static" },
     { "src": "*.js", "use": "@vercel/static" },
@@ -10,6 +11,7 @@
   ],
   "rewrites": [
     { "source": "/home", "destination": "/" },
-    { "source": "/api/send-email", "destination": "/api/send-email.js" }
+    { "source": "/api/send-email", "destination": "/api/send-email.js" },
+    { "source": "/api/leetcode", "destination": "/api/leetcode.js" }
   ]
 }
