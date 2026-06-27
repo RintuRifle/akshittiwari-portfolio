@@ -624,9 +624,9 @@ async function loadLeetCodeStats() {
     });
   }
 
-  try {
+    try {
     // Fetch stats
-    const statsRes = await fetch(`https://alfa-leetcode-api.onrender.com/${username}/solved`);
+    const statsRes = await fetch(`/api/leetcode?type=solved&username=${username}`);
     const statsType = statsRes.headers.get("content-type") || "";
     if (!statsRes.ok || !statsType.includes("application/json")) {
       throw new Error(`Invalid API response (Status: ${statsRes.status}, Type: ${statsType})`);
@@ -641,7 +641,7 @@ async function loadLeetCodeStats() {
     }
 
     // Fetch calendar
-    const calRes = await fetch(`https://alfa-leetcode-api.onrender.com/${username}/calendar`);
+    const calRes = await fetch(`/api/leetcode?type=calendar&username=${username}`);
     const calType = calRes.headers.get("content-type") || "";
     if (!calRes.ok || !calType.includes("application/json")) {
       throw new Error(`Invalid API response (Status: ${calRes.status}, Type: ${calType})`);
