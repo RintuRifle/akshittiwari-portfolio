@@ -715,6 +715,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = document.getElementById('email').value;
             const subject = document.getElementById('subject').value;
             const message = document.getElementById('message').value;
+            
+            // Enforce word limit
+            const wordCount = message.trim().split(/\s+/).filter(w => w.length > 0).length;
+            if (wordCount > 150) {
+                formStatus.textContent = `Message is too long. Please limit to 150 words (currently ${wordCount}).`;
+                formStatus.className = 'form-status error';
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+                return;
+            }
+
             const currentTime = new Date().toISOString();
             
             const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]')?.value;
