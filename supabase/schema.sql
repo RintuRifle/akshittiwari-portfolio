@@ -65,6 +65,62 @@ returns void language sql security definer as $$
 $$;
 
 -- ============================================================
+-- PROJECTS TABLE
+-- ============================================================
+create table if not exists projects (
+  id           uuid primary key default uuid_generate_v4(),
+  author_id    uuid references auth.users(id) on delete cascade not null,
+  title        text not null default '',
+  description  text default '',
+  github_url   text default null,
+  demo_url     text default null,
+  tech_stack   text[] default '{}',
+  cover_image  text default null,
+  is_completed boolean default false,
+  display_order int default 999,
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now()
+);
+
+alter table projects enable row level security;
+
+create policy "Public read projects"
+  on projects for select
+  using (true);
+
+create policy "Author full access projects"
+  on projects for all
+  using (auth.uid() = author_id)
+  with check (auth.uid() = author_id);
+
+-- ============================================================
+-- SITE SETTINGS TABLE (For Active Resume & Global Configs)
+-- ============================================================
+create table if not exists site_settings (
+  key        text primary key,
+  value      jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+alter table site_settings enable row level security;
+
+create policy "Public read site_settings"
+  on site_settings for select
+  using (true);
+
+create policy "Authenticated upsert site_settings"
+  on site_settings for all
+  using (auth.role() = 'authenticated')
+  with check (auth.role() = 'authenticated');
+
+-- ============================================================
+-- SUPABASE STORAGE BUCKET: resumes (Optional)
+-- ============================================================
+-- insert into storage.buckets (id, name, public) values ('resumes', 'resumes', true) on conflict (id) do nothing;
+-- create policy "Public Read Resumes" on storage.objects for select using (bucket_id = 'resumes');
+-- create policy "Authenticated Upload Resumes" on storage.objects for insert with check (bucket_id = 'resumes' and auth.role() = 'authenticated');
+
+-- ============================================================
 -- SETUP INSTRUCTIONS
 -- ============================================================
 -- After running this SQL:

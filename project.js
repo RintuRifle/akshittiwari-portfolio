@@ -36,6 +36,34 @@ function renderTechStack(techArray) {
     }).join('');
 }
 
+function cleanUrl(url) {
+    if (!url) return '';
+    return url.trim().toLowerCase().replace(/\/+$/, '');
+}
+
+async function loadActiveResume() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('site_settings')
+            .select('value')
+            .eq('key', 'active_resume')
+            .maybeSingle();
+
+        if (!error && data && data.value && data.value.url) {
+            const resumeUrl = data.value.url;
+            const filename = data.value.filename || 'Akshit_Kumar_Tiwari_Resume.pdf';
+
+            const resumeLinks = document.querySelectorAll('a[href*="resume"], a[download*="resume"], .nav-resume-btn, #resume-link');
+            resumeLinks.forEach(link => {
+                link.href = resumeUrl;
+                link.setAttribute('download', filename);
+            });
+        }
+    } catch (e) {
+        console.warn('Could not load active resume from Supabase, using fallback.', e);
+    }
+}
+
 async function loadProjects() {
     const grid = document.getElementById("all-projects-grid");
     if (!grid) return;
@@ -75,7 +103,8 @@ async function loadProjects() {
             if (name.includes('node') || desc.includes('node') || desc.includes('express')) detected.push('Node.js');
             if (repo.language && !detected.includes(repo.language)) detected.push(repo.language);
 
-            mergedProjectsMap.set(repo.html_url.toLowerCase(), {
+            const key = cleanUrl(repo.html_url);
+            mergedProjectsMap.set(key, {
                 title: repo.name,
                 description: repo.description,
                 github_url: repo.html_url,
@@ -91,7 +120,7 @@ async function loadProjects() {
 
         // Overlay Supabase overrides
         sbProjects.forEach(sb => {
-            const key = (sb.github_url || '').toLowerCase();
+            const key = cleanUrl(sb.github_url);
             if (key && mergedProjectsMap.has(key)) {
                 // Update existing
                 const existing = mergedProjectsMap.get(key);
@@ -101,7 +130,7 @@ async function loadProjects() {
                 if (sb.tech_stack && sb.tech_stack.length > 0) existing.tech_stack = sb.tech_stack;
                 if (sb.cover_image) existing.cover_image = sb.cover_image;
                 existing.is_completed = sb.is_completed;
-                existing.display_order = sb.display_order;
+                existing.display_order = typeof sb.display_order === 'number' ? sb.display_order : 999;
                 existing.from_supabase = true;
             } else {
                 // Add entirely new manual project from Supabase
@@ -113,7 +142,7 @@ async function loadProjects() {
                     tech_stack: sb.tech_stack || [],
                     cover_image: sb.cover_image,
                     is_completed: sb.is_completed,
-                    display_order: sb.display_order || 0,
+                    display_order: typeof sb.display_order === 'number' ? sb.display_order : 0,
                     stars: 0,
                     pushed_at: new Date(sb.created_at).getTime(),
                     from_supabase: true

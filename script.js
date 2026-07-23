@@ -1238,3 +1238,33 @@ function createRocketFlame(button) {
         flame.remove();
     }, 600);
 }
+
+// --- Dynamic Active Resume Sync ---
+async function loadActiveResume() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('site_settings')
+            .select('value')
+            .eq('key', 'active_resume')
+            .maybeSingle();
+
+        if (!error && data && data.value && data.value.url) {
+            const resumeUrl = data.value.url;
+            const filename = data.value.filename || 'Akshit_Kumar_Tiwari_Resume.pdf';
+
+            const resumeLinks = document.querySelectorAll('a[href*="resume"], a[download*="resume"], .nav-resume-btn, #resume-link');
+            resumeLinks.forEach(link => {
+                link.href = resumeUrl;
+                link.setAttribute('download', filename);
+            });
+        }
+    } catch (e) {
+        console.warn('Could not load active resume from Supabase, using fallback.', e);
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadActiveResume);
+} else {
+    loadActiveResume();
+}
